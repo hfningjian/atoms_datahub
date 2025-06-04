@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster
+  labels:
+    app: dagster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dagster
+  template:
+    metadata:
+      labels:
+        app: dagster
+    spec:
+      containers:
+      - name: dagster
+        image: "{{ .Values.dagster.image.repository }}:{{ .Values.dagster.image.tag }}"
+        ports:
+        - containerPort: 3000
+        resources:
+          {{- toYaml .Values.dagster.resources | nindent 12 }}
+        env:
+        - name: DAGSTER_HOME
+          value: /opt/dagster/dagster_home
+        - name: POSTGRES_USER
+          value: {{ .Values.postgresql.postgresqlUsername }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dagster-postgresql
+              key: postgresql-password
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresql.postgresqlDatabase }}
+        volumeMounts:
+        - name: dagster-home
+          mountPath: /opt/dagster/dagster_home
+      volumes:
+      - name: dagster-home
+        emptyDir: {} 
