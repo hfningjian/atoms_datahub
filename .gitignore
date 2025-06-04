@@ -1,0 +1,11 @@
+# Chart releaser
+.cr-release-packages/
+.cr-index/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

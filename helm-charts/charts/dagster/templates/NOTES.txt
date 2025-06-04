@@ -1,0 +1,13 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To verify that the application has started, run:
+
+  kubectl get pods -l "app=dagster"
+
+To access the Dagster UI, add the following to your /etc/hosts file:
+
+  {{ .Release.Name }}-dagster.local
+
+Then visit http://{{ .Release.Name }}-dagster.local in your browser. 
