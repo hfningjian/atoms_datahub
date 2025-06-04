@@ -11,6 +11,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,6 +23,14 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Debug Info
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -la
+          echo "Listing charts directory:"
+          ls -la charts/
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
