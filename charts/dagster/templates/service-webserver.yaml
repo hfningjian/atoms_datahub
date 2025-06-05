@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dagster-webserver
+  namespace: dagster
+  labels:
+    app: dagster-webserver
+    component: webserver
+spec:
+  type: LoadBalancer  # 使用 LoadBalancer 类型，阿里云会自动创建 SLB
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: dagster-webserver 

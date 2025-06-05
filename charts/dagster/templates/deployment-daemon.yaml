@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster-daemon
+  labels:
+    app: dagster-daemon
+spec:
+  replicas: {{ .Values.daemon.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: dagster-daemon
+  template:
+    metadata:
+      labels:
+        app: dagster-daemon
+    spec:
+      containers:
+      - name: dagster-daemon
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: Always
+        command: ["dagster-daemon", "run", "-f", "/opt/dagster/examples/xiaoleng/definitions.py"]
+        env:
+        - name: DAGSTER_HOME
+          value: /opt/dagster/dagster_home
+        - name: PYTHONPATH
+          value: /opt/dagster
+        - name: SERVICE_TYPE
+          value: "daemon"
+        - name: POSTGRES_USER
+          value: {{ .Values.postgresql.postgresqlUsername | default "dagster" }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dagster-postgresql
+              key: postgresql-password
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresql.postgresqlDatabase | default "dagster" }}
+        volumeMounts:
+        - name: dagster-home
+          mountPath: /opt/dagster/dagster_home
+      initContainers:
+      - name: copy-dagster-yaml
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - cp /opt/dagster/conf/dagster.yaml /mnt/dagster_home/dagster.yaml
+        volumeMounts:
+          - name: dagster-home
+            mountPath: /mnt/dagster_home
+      volumes:
+      - name: dagster-home
+        persistentVolumeClaim:
+          claimName: dagster-home-pvc
+      imagePullSecrets:
+        {{- toYaml .Values.image.imagePullSecrets | nindent 8 }} 

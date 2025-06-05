@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster-postgresql
+  labels:
+    app: dagster-postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dagster-postgresql
+  template:
+    metadata:
+      labels:
+        app: dagster-postgresql
+    spec:
+      containers:
+      - name: postgres
+        image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/postgres:10.21-8.6 
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_DB
+          value: dagster
+        - name: POSTGRES_USER
+          value: dagster
+        - name: POSTGRES_PASSWORD
+          value: dagster
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: dagster-postgresql-pvc 

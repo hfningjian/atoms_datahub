@@ -1,0 +1,47 @@
+# instance_class 字段已删除，采用分开的 storage 配置
+
+local_artifact_storage:
+  module: dagster._core.storage.root
+  class: LocalArtifactStorage
+  config:
+    base_dir: /opt/dagster/dagster_home/storage
+
+run_storage:
+  module: dagster_postgres.run_storage
+  class: PostgresRunStorage
+  config:
+    postgres_db:
+      username: dagster
+      password: dagster
+      hostname: dagster-postgresql
+      db_name: dagster
+      port: 5432
+
+event_log_storage:
+  module: dagster_postgres.event_log
+  class: PostgresEventLogStorage
+  config:
+    postgres_db:
+      username: dagster
+      password: dagster
+      hostname: dagster-postgresql
+      db_name: dagster
+      port: 5432
+
+schedule_storage:
+  module: dagster_postgres.schedule_storage
+  class: PostgresScheduleStorage
+  config:
+    postgres_db:
+      username: dagster
+      password: dagster
+      hostname: dagster-postgresql
+      db_name: dagster
+      port: 5432
+
+run_coordinator:
+  module: dagster.core.run_coordinator
+  class: QueuedRunCoordinator
+
+telemetry:
+  enabled: false 
