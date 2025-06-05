@@ -5,6 +5,7 @@ metadata:
   labels:
     app: dagster-daemon
 spec:
+  serviceAccountName: dagster
   replicas: {{ .Values.daemon.replicas | default 1 }}
   selector:
     matchLabels:
@@ -38,18 +39,15 @@ spec:
         volumeMounts:
         - name: dagster-home
           mountPath: /opt/dagster/dagster_home
-      initContainers:
-      - name: copy-dagster-yaml
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        command: ["/bin/sh", "-c"]
-        args:
-          - cp /opt/dagster/conf/dagster.yaml /mnt/dagster_home/dagster.yaml
-        volumeMounts:
-          - name: dagster-home
-            mountPath: /mnt/dagster_home
+        - name: dagster-instance-config
+          mountPath: /opt/dagster/dagster_home/dagster.yaml
+          subPath: dagster.yaml
       volumes:
       - name: dagster-home
         persistentVolumeClaim:
           claimName: dagster-home-pvc
+      - name: dagster-instance-config
+        configMap:
+          name: dagster-instance
       imagePullSecrets:
         {{- toYaml .Values.image.imagePullSecrets | nindent 8 }} 

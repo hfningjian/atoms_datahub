@@ -1,6 +1,6 @@
 image:
   repository: crpi-zvc92t55tucy7jw0.cn-qingdao.personal.cr.aliyuncs.com/alignbase/dagster
-  tag: 0.0.18
+  tag: 0.0.22
   imagePullSecrets:
     - name: acr-secret
 
@@ -24,7 +24,9 @@ postgresql:
     username: dagster
     password: dagster
     database: dagster
+    port: 5432
   primary:
+    host: dagster-postgresql
     persistence:
       enabled: true
       storageClass: alicloud-disk-essd
@@ -42,3 +44,6 @@ ingress:
         - path: /
           pathType: Prefix
   tls: [] 
+
+serviceAccount:
+  name: dagster 

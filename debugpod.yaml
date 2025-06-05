@@ -6,13 +6,19 @@ metadata:
 spec:
   containers:
   - name: debug
-    image: crpi-zvc92t55tucy7jw0.cn-qingdao.personal.cr.aliyuncs.com/alignbase/dagster:0.0.14
+    image: crpi-zvc92t55tucy7jw0.cn-qingdao.personal.cr.aliyuncs.com/alignbase/dagster:0.0.22
     command: ["/bin/sh", "-c", "sleep 36000"]
     volumeMounts:
     - name: dagster-home
       mountPath: /opt/dagster/dagster_home
+    - name: dagster-instance-config
+      mountPath: /opt/dagster/dagster_home/dagster.yaml
+      subPath: dagster.yaml
   volumes:
   - name: dagster-home
     persistentVolumeClaim:
       claimName: dagster-home-pvc
+  - name: dagster-instance-config
+    configMap:
+      name: dagster-instance
   restartPolicy: Never
