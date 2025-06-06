@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dagster-instance
+  namespace: {{ .Release.Namespace }}
+data:
+  dagster.yaml: |-
+    local_artifact_storage:
+      module: dagster._core.storage.root
+      class: LocalArtifactStorage
+      config:
+        base_dir: /opt/dagster/dagster_home/storage
+
+    run_storage:
+      module: dagster_postgres.run_storage
+      class: PostgresRunStorage
+      config:
+        postgres_db:
+          username: {{ .Values.postgresql.auth.username | quote }}
+          password: {{ .Values.postgresql.auth.password | quote }}
+          hostname: {{ .Values.postgresql.primary.host | default "dagster-postgresql" | quote }}
+          db_name: {{ .Values.postgresql.auth.database | quote }}
+          port: {{ .Values.postgresql.auth.port | default 5432 }}
+
+    event_log_storage:
+      module: dagster_postgres.event_log
+      class: PostgresEventLogStorage
+      config:
+        postgres_db:
+          username: {{ .Values.postgresql.auth.username | quote }}
+          password: {{ .Values.postgresql.auth.password | quote }}
+          hostname: {{ .Values.postgresql.primary.host | default "dagster-postgresql" | quote }}
+          db_name: {{ .Values.postgresql.auth.database | quote }}
+          port: {{ .Values.postgresql.auth.port | default 5432 }}
+
+    schedule_storage:
+      module: dagster_postgres.schedule_storage
+      class: PostgresScheduleStorage
+      config:
+        postgres_db:
+          username: {{ .Values.postgresql.auth.username | quote }}
+          password: {{ .Values.postgresql.auth.password | quote }}
+          hostname: {{ .Values.postgresql.primary.host | default "dagster-postgresql" | quote }}
+          db_name: {{ .Values.postgresql.auth.database | quote }}
+          port: {{ .Values.postgresql.auth.port | default 5432 }}
+
+    run_coordinator:
+      module: dagster.core.run_coordinator
+      class: QueuedRunCoordinator
+
+    telemetry:
+      enabled: false
+
+    run_launcher:
+      module: dagster_k8s.launcher
+      class: K8sRunLauncher
+      config:
+        job_image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image_pull_policy: "Always"
+        service_account_name: {{ .Values.serviceAccount.name | default "dagster" }}
+        instance_config_map: dagster-instance
+        job_namespace: {{ .Release.Namespace | quote }}
+        env_vars:
+          - DAGSTER_HOME=/opt/dagster/dagster_home
+          - PYTHONPATH=/opt/dagster
+        volume_mounts:
+          - name: dagster-home
+            mount_path: /opt/dagster/dagster_home
+          - name: dagster-instance-config
+            mount_path: /opt/dagster/dagster_home/dagster.yaml
+            sub_path: dagster.yaml
+        volumes:
+          - name: dagster-home
+            persistentVolumeClaim:
+              claimName: dagster-home-pvc
+          - name: dagster-instance-config
+            configMap:
+              name: dagster-instance 

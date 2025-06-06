@@ -1,6 +1,6 @@
 image:
   repository: crpi-zvc92t55tucy7jw0.cn-qingdao.personal.cr.aliyuncs.com/alignbase/dagster
-  tag: 0.0.22
+  tag: 0.0.24
   imagePullSecrets:
     - name: acr-secret
 

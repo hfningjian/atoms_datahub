@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceAccount.name }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: dagster-job-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "pods/exec", "services", "configmaps", "secrets", "events"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dagster-job-rolebinding
+  namespace: {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccount.name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: dagster-job-role
+  apiGroup: rbac.authorization.k8s.io 

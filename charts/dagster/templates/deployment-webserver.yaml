@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dagster-webserver
+  name: {{ .Release.Name }}-webserver
   labels:
     app: dagster-webserver
     component: webserver
 spec:
-  serviceAccountName: dagster
   replicas: {{ .Values.webserver.replicas | default 1 }}
   selector:
     matchLabels:
@@ -17,6 +16,11 @@ spec:
         app: dagster-webserver
         component: webserver
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: docker.m.daocloud.io/library/busybox:latest 
+          command: ['sh', '-c', 'until nc -z dagster-postgresql 5432; do echo waiting for postgres; sleep 2; done;']
+      serviceAccountName: {{ .Values.serviceAccount.name | default "dagster" }}
       containers:
       - name: dagster-webserver
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
